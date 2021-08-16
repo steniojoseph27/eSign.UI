@@ -5,7 +5,7 @@ using System.Web;
 
 namespace eSign.Models
 {
-    public class Document
+    public partial class Recipient
     {
         public int Id { get; set; }
         public string Title { get; set; }

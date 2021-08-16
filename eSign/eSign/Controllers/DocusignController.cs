@@ -7,6 +7,7 @@ using System.IO;
 using System.Web;
 using System.Web.Mvc;
 using Document = DocuSign.eSign.Model.Document;
+using eSign.Models;
 
 namespace DocusignDemo.Controllers
 {
@@ -22,9 +23,9 @@ namespace DocusignDemo.Controllers
         }
 
         [HttpPost]
-        public ActionResult SendDocumentforSign(Document document, HttpPostedFileBase UploadDocument)
+        public ActionResult SendDocumentforSign(Recipient recipient, HttpPostedFileBase UploadDocument)
         {
-            Document recipientModel = new Document();
+            Recipient recipientModel = new Recipient();
             string directorypath = Server.MapPath("~/App_Data/" + "Files/");
             if (!Directory.Exists(directorypath))
             {
@@ -44,9 +45,9 @@ namespace DocusignDemo.Controllers
                 data = memoryStream.ToArray();
             }
 
-            var serverpath = directorypath + document.Name.Trim() + ".pdf";
+            var serverpath = directorypath + recipient.Title.Trim() + ".pdf";
             System.IO.File.WriteAllBytes(serverpath, data);
-            docusign(serverpath, document.Name, document.Email);
+            docusign(serverpath, recipient.Title, recipient.Email);
             return View();
         }
 
@@ -80,7 +81,7 @@ namespace DocusignDemo.Controllers
             return accountId;
         }
 
-        public void docusign(string path, string documentName, string documentEmail)
+        public void docusign(string path, string recipientName, string recipientEmail)
         {
 
             ApiClient apiClient = new ApiClient("https://demo.docusign.net/restapi");
@@ -106,8 +107,8 @@ namespace DocusignDemo.Controllers
 
             // Add a recipient to sign the documeent
             DocuSign.eSign.Model.Signer signer = new DocuSign.eSign.Model.Signer();
-            signer.Email = documentEmail;
-            signer.Name = documentName;
+            signer.Email = recipientEmail;
+            signer.Name = recipientName;
             signer.RecipientId = "1";
 
             envDef.Recipients = new DocuSign.eSign.Model.Recipients();
@@ -131,6 +132,6 @@ namespace DocusignDemo.Controllers
     public class MyCredential
     {
         public string UserName { get; set; } = "steniojoseph@yahoo.com";
-        public string Password { get; set; } = "smkg@lance1";
+        public string Password { get; set; } = "Dev$jme90";
     }
 }
