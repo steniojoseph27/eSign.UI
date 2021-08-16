@@ -14,7 +14,7 @@ namespace DocusignDemo.Controllers
     public class DocusignController : Controller
     {
         MyCredential credential = new MyCredential();
-        private string INTEGRATOR_KEY = "b2b84718-bebf-42eb-84e5-a01f91f3a71e";
+        private string INTEGRATOR_KEY = "9f9e8937-0e19-4f0c-8b28-43d021e23e6c";
 
 
         public ActionResult SendDocumentforSign()
