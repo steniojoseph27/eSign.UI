@@ -8,13 +8,15 @@ using System.Web;
 using System.Web.Mvc;
 using Document = DocuSign.eSign.Model.Document;
 using eSign.Models;
+using System.Linq;
+using System.Data.Entity;
 
 namespace DocusignDemo.Controllers
 {
     public class DocusignController : Controller
     {
         MyCredential credential = new MyCredential();
-        private string INTEGRATOR_KEY = "9f9e8937-0e19-4f0c-8b28-43d021e23e6c";
+        private string INTEGRATOR_KEY = "6ec07386-0da7-45e5-a45a-49ebbe450be9";
 
 
         public ActionResult SendDocumentforSign()
@@ -124,14 +126,118 @@ namespace DocusignDemo.Controllers
 
             // print the JSON response
             var result = JsonConvert.SerializeObject(envelopeSummary);
+
+            Recipient recipient = new Recipient();
+            recipient.Description = "envDef.EmailSubject";
+            recipient.Email = recipientEmail;
+            recipient.Title = recipientName;
+            recipient.Status = envelopeSummary.Status;
+            recipient.Documents = fileBytes;
+            recipient.CreationDate = System.Convert.ToDateTime(envelopeSummary.StatusDateTime);
+            recipient.EnvelopeID = envelopeSummary.EnvelopeId;
+
+            ESignDocumentEntities eSignDocumentEntities = new ESignDocumentEntities();
+            eSignDocumentEntities.Recipients.Add(recipient);
+            eSignDocumentEntities.SaveChanges();
+        }
+
+        public ActionResult getEnvelopeInformation()
+        {
+            ApiClient apiClient = new ApiClient("https://demo.docusign.net/restapi");
+            Configuration.Default.ApiClient = apiClient;
+
+            // provide a valid envelope ID from your account.  
+            string envelopeId = "6ec07386-0da7-45e5-a45a-49ebbe450be9"; //Enter Stored Envelope Id
+            MyCredential myCredential = new MyCredential();
+
+            string accountId = loginApi(myCredential.UserName, myCredential.Password);
+
+
+            // |EnvelopesApi| contains methods related to creating and sending Envelopes including status calls
+            EnvelopesApi envelopesApi = new EnvelopesApi();
+            Envelope envInfo = envelopesApi.GetEnvelope(accountId, envelopeId);
+            if (envInfo.Status == "completed")
+            {
+                ESignDocumentEntities eSignDocumentEntities = new ESignDocumentEntities();
+                var recipient = eSignDocumentEntities.Recipients.Where(a => a.EnvelopeID == envelopeId).FirstOrDefault();
+                recipient.Status = "completed";
+                recipient.UpdateOn = System.DateTime.Now;
+                eSignDocumentEntities.Entry(recipient).State = EntityState.Modified;
+                eSignDocumentEntities.SaveChanges();
+            }
+            return View();
+        } // end requestSignatu
+
+        List<Recipient> recipientsDocs = new List<Recipient>();
+        public ActionResult ListDocuments()
+        {
+            ApiClient apiClient = new ApiClient("https://demo.docusign.net/restapi");
+            Configuration.Default.ApiClient = apiClient;
+            MyCredential myCredential = new MyCredential();
+
+            // call the Login() API which sets the user's baseUrl and returns their accountId
+            string accountId = loginApi(myCredential.UserName, myCredential.Password);
+
+            ESignDocumentEntities eSignDocumentEntities = new ESignDocumentEntities();
+            var recipients = eSignDocumentEntities.Recipients.ToList();
+            string serverDirectory = Server.MapPath("~/Uploadfiles/");
+            if (!Directory.Exists(serverDirectory))
+            {
+                Directory.CreateDirectory(serverDirectory);
+            }
+
+            foreach (var recipient in recipients)
+            {
+                string recipientDirectory = Server.MapPath("~/Uploadfiles/" + recipient.EnvelopeID);
+                if (!Directory.Exists(recipientDirectory))
+                {
+                    Directory.CreateDirectory(recipientDirectory);
+                }
+
+                EnvelopeDocumentsResult documentList = ListEnvelopeDocuments(accountId, recipient.EnvelopeID);
+
+                int i = 0;
+                string SignedPDF = string.Empty;
+                EnvelopesApi envelopesApi = new EnvelopesApi();
+                foreach (var document in documentList.EnvelopeDocuments)
+                {
+                    string signingStatus = recipient.Status == "completed" ? "Signed" : "Yet to Sign";
+                    MemoryStream docStream = (MemoryStream)envelopesApi.GetDocument(accountId, recipient.EnvelopeID, documentList.EnvelopeDocuments[i].DocumentId);
+                    string documentName = document.Name != "Summary" ? document.Name : "Summary";
+                    SignedPDF = Server.MapPath("~/Uploadfiles/" + recipient.EnvelopeID + "/" + recipient.EnvelopeID + "_" + documentName + ".pdf");
+                    using (var fileStream = System.IO.File.Create(SignedPDF))
+                    {
+                        docStream.Seek(0, SeekOrigin.Begin);
+                        docStream.CopyTo(fileStream);
+                    }
+
+                    recipientsDocs.Add(new Recipient { EnvelopeID = recipient.EnvelopeID, Title = recipient.Title, Email = recipient.Email, Status = signingStatus, documentURL = SignedPDF, CreationDate = recipient.CreationDate, UpdateOn = recipient.UpdateOn });
+
+                    i++;
+                }
+            }
+
+            return View(recipientsDocs);
+        }
+
+        public EnvelopeDocumentsResult ListEnvelopeDocuments(string accountId, string envelopeId)
+        {
+            EnvelopesApi envelopesApi = new EnvelopesApi();
+            EnvelopeDocumentsResult docsList = envelopesApi.ListDocuments(accountId, envelopeId);
+            return docsList;
+        }
+
+        public FileResult Download(string filePath)
+        {
+            string fileName = Path.GetFileName(filePath);
+            string contentType = "application/pdf";
+            return File(filePath, contentType, fileName);
         }
     }
 
-
-
     public class MyCredential
     {
-        public string UserName { get; set; } = "steniojoseph@yahoo.com";
+        public string UserName { get; set; } = "steniojosephs@gmail.com";
         public string Password { get; set; } = "Dev$jme90";
     }
 }

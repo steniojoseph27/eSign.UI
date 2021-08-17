@@ -1,0 +1,78 @@
+﻿@model IEnumerable<eSign.Models.Recipient>
+
+@{
+    /**/
+
+    ViewBag.Title = "ListDocuments";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body style="margin-top:20px">
+    <div class="container">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="btn-primary">
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Title)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Email)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.EnvelopeID)
+                        </th>
+                        @*<th>
+                                @Html.DisplayNameFor(model => model.Status)
+                            </th>*@
+                        <th>
+                            @Html.DisplayNameFor(model => model.CreationDate)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.UpdatedOn)
+                        </th>
+                        <th>
+                            Document
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Title)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Email)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.EnvelopeID)
+                            </td>
+                            @*<td>
+                                    @Html.DisplayFor(modelItem => item.Status)
+                                </td>*@
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CreationDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.UpdatedOn)
+                            </td>
+                            <td>
+                                @*@Html.DisplayFor(modelItem => item.documentURL)*@
+                                @Html.ActionLink(item.Status, "Download", "Docusign", new { filePath = item.documentURL }, null)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
