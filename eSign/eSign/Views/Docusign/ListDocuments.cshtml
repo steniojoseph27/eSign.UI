@@ -3,7 +3,7 @@
 @{
     /**/
 
-    ViewBag.Title = "ListDocuments";
+    ViewBag.Title = "List of Document(s)";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -30,16 +30,22 @@
                             @Html.DisplayNameFor(model => model.EnvelopeID)
                         </th>
                         @*<th>
-                                @Html.DisplayNameFor(model => model.Status)
+                                @Html.DisplayNameFor(model => model.Signatories)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Description)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Documents)
                             </th>*@
+                        <th>
+                            @Html.DisplayNameFor(model => model.Status)
+                        </th>
                         <th>
                             @Html.DisplayNameFor(model => model.CreationDate)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.UpdatedOn)
-                        </th>
-                        <th>
-                            Document
+                            @Html.DisplayNameFor(model => model.UpdateOn)
                         </th>
                     </tr>
                 </thead>
@@ -47,6 +53,9 @@
                     @foreach (var item in Model)
                     {
                         <tr>
+                            @*<td>
+                                    @Html.DisplayFor(modelItem => item.Id)
+                                </td>*@
                             <td>
                                 @Html.DisplayFor(modelItem => item.Title)
                             </td>
@@ -57,16 +66,24 @@
                                 @Html.DisplayFor(modelItem => item.EnvelopeID)
                             </td>
                             @*<td>
-                                    @Html.DisplayFor(modelItem => item.Status)
+                                    @Html.DisplayFor(modelItem => item.Signatories)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Description)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Documents)
                                 </td>*@
+                            <td>
+                                @Html.DisplayNameFor(model => model.Status)
+                            </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.CreationDate)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.UpdatedOn)
+                                @Html.DisplayFor(modelItem => item.UpdateOn)
                             </td>
                             <td>
-                                @*@Html.DisplayFor(modelItem => item.documentURL)*@
                                 @Html.ActionLink(item.Status, "Download", "Docusign", new { filePath = item.documentURL }, null)
                             </td>
                         </tr>

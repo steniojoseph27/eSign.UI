@@ -3,7 +3,7 @@
 @{
     /**/
 
-    ViewBag.Title = "SendDocumentforSign";
+    ViewBag.Title = "eSign";
 }
 
 @using (Html.BeginForm("SendDocumentforSign", "Docusign", FormMethod.Post, new { enctype = "multipart/form-data", id = "SendForsign" }))
@@ -16,13 +16,6 @@
             <div class="form-horizontal">
                 <hr />
                 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                @*<div class="form-group">
-                    @Html.LabelFor(model => model.Id, htmlAttributes: new { @class = "control-label col-md-2" })
-                    <div class="col-md-10">
-                        @Html.EditorFor(model => model.Id, new { htmlAttributes = new { @class = "form-control" } })
-                        @Html.ValidationMessageFor(model => model.Id, "", new { @class = "text-danger" })
-                    </div>
-                </div>*@
                 <div class="form-group">
                     @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
                     <div class="col-md-10">
@@ -76,5 +69,3 @@
 <script src="~/Scripts/jquery-1.10.2.min.js"></script>
 <script src="~/Scripts/jquery.validate.min.js"></script>
 <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
-
-

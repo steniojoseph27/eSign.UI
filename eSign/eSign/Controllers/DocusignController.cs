@@ -128,13 +128,15 @@ namespace DocusignDemo.Controllers
             var result = JsonConvert.SerializeObject(envelopeSummary);
 
             Recipient recipient = new Recipient();
+            //recipient.Signatories = recipient.Signatories;
             recipient.Description = "envDef.EmailSubject";
             recipient.Email = recipientEmail;
             recipient.Title = recipientName;
             recipient.Status = envelopeSummary.Status;
             recipient.Documents = fileBytes;
-            recipient.CreationDate = System.Convert.ToDateTime(envelopeSummary.StatusDateTime);
             recipient.EnvelopeID = envelopeSummary.EnvelopeId;
+
+            recipient.CreationDate = System.Convert.ToDateTime(envelopeSummary.StatusDateTime);
 
             ESignDocumentEntities eSignDocumentEntities = new ESignDocumentEntities();
             eSignDocumentEntities.Recipients.Add(recipient);
@@ -160,6 +162,7 @@ namespace DocusignDemo.Controllers
             {
                 ESignDocumentEntities eSignDocumentEntities = new ESignDocumentEntities();
                 var recipient = eSignDocumentEntities.Recipients.Where(a => a.EnvelopeID == envelopeId).FirstOrDefault();
+
                 recipient.Status = "completed";
                 recipient.UpdateOn = System.DateTime.Now;
                 eSignDocumentEntities.Entry(recipient).State = EntityState.Modified;
@@ -201,7 +204,7 @@ namespace DocusignDemo.Controllers
                 EnvelopesApi envelopesApi = new EnvelopesApi();
                 foreach (var document in documentList.EnvelopeDocuments)
                 {
-                    string signingStatus = recipient.Status == "completed" ? "Signed" : "Yet to Sign";
+                    string signingStatus = recipient.Status == "completed" ? "Signed" : "Not Sign";
                     MemoryStream docStream = (MemoryStream)envelopesApi.GetDocument(accountId, recipient.EnvelopeID, documentList.EnvelopeDocuments[i].DocumentId);
                     string documentName = document.Name != "Summary" ? document.Name : "Summary";
                     SignedPDF = Server.MapPath("~/Uploadfiles/" + recipient.EnvelopeID + "/" + recipient.EnvelopeID + "_" + documentName + ".pdf");
@@ -211,7 +214,18 @@ namespace DocusignDemo.Controllers
                         docStream.CopyTo(fileStream);
                     }
 
-                    recipientsDocs.Add(new Recipient { EnvelopeID = recipient.EnvelopeID, Title = recipient.Title, Email = recipient.Email, Status = signingStatus, documentURL = SignedPDF, CreationDate = recipient.CreationDate, UpdateOn = recipient.UpdateOn });
+                    recipientsDocs.Add(new Recipient
+                    {
+                        Title = recipient.Title,
+                        Email = recipient.Email,
+                        EnvelopeID = recipient.EnvelopeID,
+                        Signatories = recipient.Signatories,
+                        Description = recipient.Description,
+                        Status = signingStatus,
+                        documentURL = SignedPDF,
+                        CreationDate = recipient.CreationDate,
+                        UpdateOn = recipient.UpdateOn
+                    });
 
                     i++;
                 }
